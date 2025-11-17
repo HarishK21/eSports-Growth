@@ -1,6 +1,7 @@
-import kagglehub
+import pandas as pd
 
-# Download latest version
-path = kagglehub.dataset_download("emirhanakku/global-gaming-and-esports-growth-dataset-20102025")
+#Loading Data
+df = pd.read_csv("global_gaming_esports_2010_2025.csv")
+print(df.head())
 
-print("Path to dataset files:", path)
+
