@@ -117,17 +117,39 @@ print(f"\nBest Model: {best['name']} (R2 = {best['r2']:.4f})")
 y_predBest = bestPipeline.predict(X_test)
 
 # Predicted vs Actual
-
 plt.figure(figsize = (6, 6))
 plt.scatter(y_test, y_predBest, alpha = 0.7)
 minNum = min(y_test.min(), y_predBest.min())
 maxNum = max(y_test.max(), y_predBest.max())
 
 # Plotting Chart
-
 plt.plot([minNum, maxNum], [minNum, maxNum], "r--")
 plt.xlabel("Actual: " + target)
 plt.ylabel("Predicted " + target)
 plt.title(f"{best['name']}: Predicted vs Actual")
+plt.tight_layout()
+plt.show()
+
+# Chart representing top 10 overperformerers vs bottom 10 underperformers
+results = X_test.copy()
+results["Actual_Revenue"] = y_test
+results["Predicted_Revenue"] = y_predBest
+results["Residual"] = results["Actual_Revenue"] - results["Predicted_Revenue"]
+
+print("\nSample of residuals (Actual - Predicted):")
+print(results[[year, "Country", "Actual_Revenue", "Predicted_Revenue", "Residual"]].head())
+
+cResiduals = (results.groupby("Country")["Residual"].mean().sort_values())
+
+top = cResiduals.tail(10)    # Better than predicted
+bottom = cResiduals.head(10) # Worse than predicted
+combined = pd.concat([bottom, top])
+
+plt.figure(figsize=(12, 7))
+combined.plot(kind="barh", color=["red"]*10 + ["green"]*10)
+plt.title("Top 10 Underperforming and Overperforming Countries")
+plt.xlabel("Average Residual in Billions")
+plt.ylabel("Country")
+plt.axvline(0, color="black", linewidth=1)  # Reference Line
 plt.tight_layout()
 plt.show()
