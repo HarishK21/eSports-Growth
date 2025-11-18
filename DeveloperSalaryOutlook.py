@@ -7,6 +7,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
+import matplotlib.pyplot as plt
 
 # Loading data and analyzing features
 df = pd.read_csv("global_gaming_esports_2010_2025.csv")
@@ -93,9 +94,9 @@ preprocessor  = ColumnTransformer(transformers = [("numeric", nTransformer, nFea
 models = {"Linear Regression": LinearRegression(), "Ridge Regression": Ridge(alpha = 1.0), "Random Forest": RandomForestRegressor(n_estimators = 200, max_depth = 10, random_state = 42)}
 
 def eval(name, model):
-    steps = Pipeline([("preprocess", preprocessor), ("model", model)])
-    steps.fit(X_train, y_train)
-    y_pred = steps.predict(X_test)
+    pipe = Pipeline([("preprocess", preprocessor), ("model", model)])
+    pipe.fit(X_train, y_train)
+    y_pred = pipe.predict(X_test)
     r2 = r2_score(y_test, y_pred) # R2 Score (Close to 1 = better)
     mae = mean_absolute_error(y_test, y_pred) # MAE Score 
     rmse = mean_squared_error(y_test, y_pred, squared = False)
@@ -103,11 +104,30 @@ def eval(name, model):
     print(f"R^2: {r2:.5f}")
     print(f"MAE: {mae:.5f}")
     print(f"RMSE: {rmse:.5f}")
-    return {"name": name, "pipeline" : steps, "r2": r2}
+    return {"name": name, "pipeline" : pipe, "r2": r2}
 
 results = []
 for name, model in models.items():
     results.append(eval(name, model))
 best = max(results, key=lambda d: d["r2"])
-best_pipeline = best["pipeline"]
+bestPipeline = best["pipeline"]
 print(f"\nBest Model: {best['name']} (R2 = {best['r2']:.4f})")
+
+# Best model for test set
+y_predBest = bestPipeline.predict(X_test)
+
+# Predicted vs Actual
+
+plt.figure(figsize = (6, 6))
+plt.scatter(y_test, y_predBest, alpha = 0.7)
+minNum = min(y_test.min(), y_predBest.min())
+maxNum = max(y_test.max(), y_predBest.max())
+
+# Plotting Chart
+
+plt.plot([minNum, maxNum], [minNum, maxNum], "r--")
+plt.xlabel("Actual: " + target)
+plt.ylabel("Predicted " + target)
+plt.title(f"{best['name']}: Predicted vs Actual")
+plt.tight_layout()
+plt.show()
