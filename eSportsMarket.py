@@ -136,7 +136,7 @@ results["Actual_Revenue"] = y_test
 results["Predicted_Revenue"] = y_predBest
 results["Residual"] = results["Actual_Revenue"] - results["Predicted_Revenue"]
 
-print("\nSample of residuals (Actual - Predicted):")
+print("\nSample of residuals:")
 print(results[[year, "Country", "Actual_Revenue", "Predicted_Revenue", "Residual"]].head())
 
 cResiduals = (results.groupby("Country")["Residual"].mean().sort_values())
@@ -153,4 +153,5 @@ plt.ylabel("Country")
 plt.axvline(0, color="black", linewidth=1)  # Reference Line
 plt.tight_layout()
 plt.show()
+
 
